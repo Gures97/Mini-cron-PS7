@@ -10,7 +10,8 @@
 
 int main(){
 	pid_t pid, sid;
-
+	int zadania_fd, logi_fd;
+	
 	pid = fork();
 	if(pid < 0){
 		exit(EXIT_FAILURE);
@@ -37,6 +38,7 @@ int main(){
 
 	while(1){
 		/* kod demona*/
+
 		sleep(30);
 	}
 
