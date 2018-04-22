@@ -1,6 +1,6 @@
 #ifndef COMMANDLIST_H
 #define COMMANDLIST_H
-
+#include <time.h>
 typedef struct singlecommand{
 	time_t commandTime;
 	char* command;
@@ -13,7 +13,7 @@ typedef SingleCommand *CommandList;
 void addCommand(CommandList* root, 
 		int hour, 
 		int minute,
-		char[] command, 
+		char* command, 
 		int info,
 		time_t now);
 
@@ -22,5 +22,7 @@ SingleCommand getNext(CommandList* root);
 void clearList(CommandList* root);
 
 int howMuchCommands(CommandList* root);
+
+CommandList last(CommandList root);
 
 #endif

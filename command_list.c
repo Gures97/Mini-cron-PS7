@@ -1,16 +1,18 @@
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 #include "command_list.h"
 
-void addCommand(CommandList* root
+void addCommand(CommandList* root,
 		int hour, 
 		int minute, 
-		char[] command, 
+		char* command, 
 		int info,
 		time_t now){
 
 	struct tm commandTime;
-	CommandList new = (SingleCommand)malloc(sizeof(SingleCommand));
+	CommandList tail = last(*root);
+	CommandList new = (CommandList)malloc(sizeof(SingleCommand));
 	new->next = NULL;
 	strcpy(new->command, command);
 	
@@ -24,14 +26,13 @@ void addCommand(CommandList* root
 	if(*root == NULL)
 		*root = new;
 	else
-		last(*root)->next = new;
+		tail->next = new;
 
 }
 
 SingleCommand getNext(CommandList* root){
 	SingleCommand command;
 	CommandList newRoot;
-	sort(root);
 	command = **root;
 
 	newRoot = (*root)->next;
@@ -45,10 +46,11 @@ void clearList(CommandList* root){
 }
 
 CommandList last(CommandList root){
-	if(root == NULL || root->next == NULL)
-		return root;
-	else
-		return last(root->next);
+	if(root == NULL)
+		return NULL;
+	while(root->next != NULL)
+		root = root->next;
+	return root;
 }
 
 int howMuchCommands(CommandList* root){
