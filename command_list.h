@@ -2,9 +2,8 @@
 #define COMMANDLIST_H
 
 typedef struct singlecommand{
-	int hour;
-	int minute;
-	char[] command;
+	time_t commandTime;
+	char* command;
 	int info;
 	struct singlecommand *next;
 } SingleCommand;
@@ -13,9 +12,10 @@ typedef SingleCommand *CommandList;
 
 void addCommand(CommandList* root, 
 		int hour, 
-		int minute
-		char* command, 
-		int info);
+		int minute,
+		char[] command, 
+		int info,
+		time_t now);
 
 SingleCommand getNext(CommandList* root);
 
