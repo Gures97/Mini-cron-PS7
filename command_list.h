@@ -19,9 +19,8 @@ void addCommand(CommandList* root,
 
 SingleCommand getNext(CommandList* root);
 
-void clear(CommandList* root);
+void clearList(CommandList* root);
 
-void deleteCommand(CommandList* root, 
-		int commandIndex);
+int howMuchCommands(CommandList* root);
 
 #endif

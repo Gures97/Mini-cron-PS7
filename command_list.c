@@ -20,7 +20,7 @@ void addCommand(CommandList* root
 	if(difftime(mktime(&commandTime), now) <= 0)
 		commandTime.tm_mday += 1;
 
-	new->commandTime = commandTime;		
+	new->commandTime = mktime(&commandTime);		
 	if(*root == NULL)
 		*root = new;
 	else
@@ -39,24 +39,9 @@ SingleCommand getNext(CommandList* root){
 	*root = newRoot;
 }
 
-void clear(CommandList* root){
-
-}
-
-void deleteCommand(CommandList* root, int commandIndex){
-	CommandList temp = *root,prev = NULL;
-
-	for(int i = 0; i<commandIndex;i++){
-		if(temp == NULL)
-			return;
-		prev = temp;
-		temp = temp->next;
-	}
-	if(temp == *root)
-		*root = temp->next;
-	else
-		prev->next = temp->next;
-	free(temp);
+void clearList(CommandList* root){
+	while(*root != NULL)
+		getNext(root);
 }
 
 CommandList last(CommandList root){
@@ -66,11 +51,12 @@ CommandList last(CommandList root){
 		return last(root->next);
 }
 
-void rotate(CommandList* root){
-	CommandList newRoot = (*root)->next;
-	CommandList last = last(*root);
-	
-	last->next = *root;
-	(*root)->next = NULL;
-	*root = newRoot;
+int howMuchCommands(CommandList* root){
+	int count = 0;
+	CommandList temp = *root;
+	while(temp != NULL){
+		count++;
+		temp = temp->next;
+	}
+	return count;
 }
