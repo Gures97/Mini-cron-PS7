@@ -4,18 +4,20 @@
 #include "daemon_functions.h"
 #include "command_list.h"
 
-int getNextSeconds(SingleCommand cmd, time_t now){
+int getNextSeconds(SingleCommand cmd){
+	time_t now = setNow();
 	return (int)difftime(cmd.commandTime, now);
 }
 
-void runCommand(SingleCommand cmd){
-	char* command = cmd.command;
+void runCommand(char* cmd, int info){
 	char** args;
 	char* bufor = strtok(command," ");
+	int index = 0;
 	while(bufor != NULL){
-		args
+		args[index]=bufor;
+		bufor = strtok(NULL," ");
 	}
-	pid_t pid, sid;
+	pid_t pid;
 	
 	pid = fork();
 	if(pid < 0){
@@ -25,27 +27,11 @@ void runCommand(SingleCommand cmd){
 	if(pid == (pid_t)0){
 		//proces potomny
 		execvp(args[0], args[0]);
-	}
-
-	umask(0);
-
-	sid = setsid();
-	if(sid < 0){
-		exit(EXIT_FAILURE);
-	}
-
-	if((chdir("/")) < 0){
-		exit(EXIT_FAILURE);
-	}
-
-	close(STDIN_FILENO);
-	close(SDROUT_FILENO);
-	close(STDERR_FILENO);
-	
+	}	
 }
 
 time_t setNow(void){
-	time_t = now;
+	time_t now;
 	time(&now);
 	return now;
 }
