@@ -10,10 +10,10 @@ typedef struct singlecommand{
 
 typedef SingleCommand *CommandList;
 
-void addCommand(CommandList* root, 
-		int hour, 
+void addCommand(CommandList* root,
+		int hour,
 		int minute,
-		char* command, 
+		char* command,
 		int info,
 		time_t now);
 
@@ -24,5 +24,7 @@ void clearList(CommandList* root);
 int howMuchCommands(CommandList* root);
 
 CommandList last(CommandList root);
+
+void createCommandList(CommandList* root, int taskfile_fd);
 
 #endif
