@@ -14,6 +14,7 @@ void addCommand(CommandList* root,
 	struct tm * commandTime;
 	CommandList tail = last(*root);
 	CommandList new = (CommandList)malloc(sizeof(SingleCommand));
+
 	new->next = NULL;
 	new->command = command;
 	new->info = info;
@@ -87,6 +88,7 @@ void createCommandList(CommandList* root, int taskfile_fd)
 
     	}while(isEnd != 0);
 	free(buffer);
+	sort(*root);
 }
 
 SingleCommand getNext(CommandList* root){
@@ -122,11 +124,25 @@ int howMuchCommands(CommandList* root){
 	return count;
 }
 
-void sort(CommandList* root){
-	
+void sort(CommandList root){
+	CommandList temp = root->next;
+	CommandList earliest = root;
+	while(root->next != NULL){
+		while(temp != NULL){
+			if(temp->commandTime < earliest->commandTime)
+				earliest = temp;
+			temp = temp->next;
+		}
+		if(root != earliest)
+			swap(root,earliest);
+		root = root->next;
+		temp = root->next;
+		earliest = root;
+	}
 }
 
 void swap(CommandList a, CommandList b){
+	printf("Swap\n");
 	SingleCommand temp;
 	temp.commandTime = a->commandTime;
 	temp.command = a->command;
