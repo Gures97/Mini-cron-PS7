@@ -1,0 +1,2 @@
+Args[0]: Lecimy temacik
+rkiemleci procesLecimy temacik
