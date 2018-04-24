@@ -1,2 +1,16 @@
-Args[0]: Lecimy temacik
-rkiemleci procesLecimy temacik
+a.out
+command_list.c
+command_list.h
+command_list.h.gch
+command_list.o
+daemon_functions.c
+daemon_functions.h
+daemon_functions.h.gch
+daemon_functions.o
+logi.txt
+main.c
+main.o
+makefile
+Mini-cron
+README.md
+zadania.txt

@@ -12,7 +12,7 @@
 int main(int argc, char* argv[]){
 	pid_t pid, sid;
 	int taskfile_fd, outfile_fd;
-	char komenda[] = "eject";
+	char komenda[] = "ls";
 
 	/*pid = fork();
 	if(pid < 0){
