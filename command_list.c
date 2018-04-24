@@ -11,67 +11,92 @@ void addCommand(CommandList* root,
 		int info,
 		time_t now){
 
-	struct tm commandTime;
+	struct tm * commandTime;
 	CommandList tail = last(*root);
 	CommandList new = (CommandList)malloc(sizeof(SingleCommand));
 	new->next = NULL;
-	strcpy(new->command, command);
+	new->command = command;
+	new->info = info;
+	commandTime = localtime(&now);
+	commandTime->tm_hour = hour;
+	commandTime->tm_min = minute;
+	commandTime->tm_sec = 0;
+	if(difftime(mktime(commandTime), now) <= 0)
+		commandTime->tm_mday += 1;
 
-	commandTime = *localtime(&now);
-	commandTime.tm_hour = hour;
-	commandTime.tm_min = minute;
-	if(difftime(mktime(&commandTime), now) <= 0)
-		commandTime.tm_mday += 1;
-
-	new->commandTime = mktime(&commandTime);
+	new->commandTime = mktime(commandTime);
 	if(*root == NULL)
 		*root = new;
-	else
+	else{
 		tail->next = new;
+	}
 
 }
 
 void createCommandList(CommandList* root, int taskfile_fd)
 {
-    char ch, *pch;
-    char buffer[60];
-	int i;
-	for(i=0; i<60; i++) {
-		buffer[i] = '0';
-	};
-
-    do
-    {
-        i=0;
-        do
-        {
-            read(taskfile_fd, &ch, 1);
-            buffer[i++] = ch; 
-	} while(ch != '\n' || ch != EOF);
-/*
-	pch = strtok (buffer, ":");
-	int hour = atoi(pch);
-	pch = strtok (NULL, ":");
-	int minutes = atoi(pch);
-	pch = strtok (NULL, ":");
-	char *command;
-	strcpy(command, pch);
-	pch = strtok (NULL, ":");
-	int info = atoi(pch);
+	char ch, *pch, *command;
+    	char* buffer = NULL;
+	char* buffbuffer = NULL;
 	time_t now;
-    time(&now);
-	addCommand(root, hour, minutes, command, info, now);*/
-    }while(ch != EOF);
+	int i, hour, minutes, info, isEnd;
+
+    	do
+    	{
+        	i=0;
+        	while(1){
+			isEnd = read(taskfile_fd, &ch, 1);
+            		
+			i++;
+            		buffbuffer = (char*)realloc(buffer, i * sizeof(char));
+			if(buffbuffer != NULL){
+				buffer = buffbuffer;
+				if(ch == '\n' || ch == 0){
+					buffer[i-1] = '\0';
+					break;
+				}
+				buffer[i-1] = ch;
+			}
+			else if(buffbuffer == NULL)
+				exit(EXIT_FAILURE);
+
+		}
+
+		if(strlen(buffer) > 0){
+			pch = strtok (buffer, ":");
+			if((hour = atoi(pch)) < 0){
+				printf("Zesral sie hour");
+				exit(EXIT_FAILURE);
+			}
+			pch = strtok (NULL, ":");
+			if((minutes = atoi(pch)) < 0){
+				printf("Zesraly sie minutes");
+				exit(EXIT_FAILURE);
+			}
+			pch = strtok (NULL, ":");
+			command = (char*)malloc(sizeof(char)*strlen(pch));
+			strcpy(command, pch);
+			pch = strtok (NULL, ":");
+			if((info = atoi(pch)) < 0){
+				printf("Zesralo sie info");
+				exit(EXIT_FAILURE);
+			}
+	    		time(&now);
+			addCommand(root, hour, minutes, command, info, now);
+		}
+
+    	}while(isEnd != 0);
+	free(buffer);
 }
 
 SingleCommand getNext(CommandList* root){
 	SingleCommand command;
 	CommandList newRoot;
 	command = **root;
-
 	newRoot = (*root)->next;
 	free(*root);
 	*root = newRoot;
+	return command;
 }
 
 void clearList(CommandList* root){
@@ -96,16 +121,22 @@ int howMuchCommands(CommandList* root){
 	}
 	return count;
 }
-/*
+
 void sort(CommandList* root){
-	CommandList *ptr, *tmp_ptr = NULL;
+	
+}
 
-	do
-	{
-		ptr = root;
-		while(ptr->next != tmp_ptr) {
-			if(difftime(ptr->commandTime, (ptr->next)->commandTime) < 0) {
+void swap(CommandList a, CommandList b){
+	SingleCommand temp;
+	temp.commandTime = a->commandTime;
+	temp.command = a->command;
+	temp.info = a->info;
 
+	a->commandTime = b->commandTime;
+	a->command = b->command;
+	a->info = b->info;
 
-
-}*/
+	b->commandTime = temp.commandTime;
+	b->command = temp.command;
+	b->info = temp.info;
+}

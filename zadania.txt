@@ -1,2 +1,5 @@
 12:34:ls:2
 12:45:ls -l|less:2
+22:33:eject:1
+07:05:ifconfig:0
+21:37:echo dzien dobry:2
