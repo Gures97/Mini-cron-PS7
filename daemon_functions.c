@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "daemon_functions.h"
+#include <syslog.h>
+
 
 int getNextSeconds(SingleCommand cmd){
 	time_t now = setNow();
@@ -33,7 +35,7 @@ void runCommand(char* cmd, int info, int out_fd){
 
 	printf("porobione argsy przed forkiem\n");
 	pid_t pid;
-	
+
 	pid = fork();
 	if(pid < 0){
 		printf("Zesralo sie\n");
@@ -60,4 +62,25 @@ time_t setNow(void){
 	return now;
 }
 
+void saveToSyslog(CommandList root){
+	openlog(NULL, LOG_NDELAY, LOG_INFO);
+	while(root != NULL) {
+	
+		struct tm commandTime;
+		localtime_r(&(root->commandTime), &commandTime);
+		time_t now;
+		time(&now);
+		struct tm currentTime;
+		localtime_r(&now, &currentTime);
+		printf("Command Time: %d:%d %d.%d.%d\n", commandTime.tm_hour, commandTime.tm_min, commandTime.tm_mday, commandTime.tm_mon, commandTime.tm_year);
+		if(commandTime.tm_mday == currentTime.tm_mday &&	
+			(commandTime.tm_hour > currentTime.tm_hour ||
+			commandTime.tm_hour == currentTime.tm_hour && commandTime.tm_min > currentTime.tm_hour))
+			 {
+			syslog(LOG_INFO,"%d:%d:%s:%d", commandTime.tm_hour, commandTime.tm_min, root->command, root->info);
+		}
+		root = root->next;
+	}
+	closelog();
+}
 

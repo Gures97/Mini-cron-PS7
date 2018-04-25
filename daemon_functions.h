@@ -10,4 +10,6 @@ void runCommand(char* cmd, int info, int out_fd);
 
 time_t setNow(void);
 
+void saveToSyslog(CommandList root);
+
 #endif

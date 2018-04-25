@@ -6,16 +6,31 @@
 #include <errno.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <signal.h>
 #include "command_list.h"
 #include "daemon_functions.h"
+
+CommandList cmdlist = NULL;
+
+void handler(int signum){
+	switch(signum){
+		case SIGUSR1:
+		break;
+		case SIGUSR2:
+			saveToSyslog(cmdlist);
+		break;
+	}
+}
 
 int main(int argc, char* argv[]){
 	pid_t pid, sid;
 	int taskfile_fd, outfile_fd;
 	char komenda[] = "ls";
-	CommandList cmdlist = NULL;
-	SingleCommand nextCommand;
 
+	SingleCommand nextCommand;
+	
+	signal(SIGUSR1, handler);
+	signal(SIGUSR2, handler);
 	/*pid = fork();
 	if(pid < 0){
 		exit(EXIT_FAILURE);
@@ -55,17 +70,8 @@ int main(int argc, char* argv[]){
     	}
 	
 	createCommandList(&cmdlist, taskfile_fd);
-	
-	/*printf("Succes\n");
-	printf("Argv[0] tego programu: %s\n", argv[0]);
-	runCommand(komenda,0,outfile_fd);
-	printf("Lecimy temacik\n");*/
-	
-	while(cmdlist != NULL){
-		nextCommand = getNext(&cmdlist);
-		printf("Komenda: %i:%s:%i\n",(int)nextCommand.commandTime,nextCommand.command, nextCommand.info);
-	}
-	
+	raise(SIGUSR2);
+
 	/*	
 
 	while(1){
