@@ -142,7 +142,6 @@ void sort(CommandList root){
 }
 
 void swap(CommandList a, CommandList b){
-	printf("Swap\n");
 	SingleCommand temp;
 	temp.commandTime = a->commandTime;
 	temp.command = a->command;

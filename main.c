@@ -12,11 +12,11 @@
 int main(int argc, char* argv[]){
 	pid_t pid, sid;
 	int taskfile_fd, outfile_fd;
-	char komenda[] = "ls";
+	char komenda[] = "eject";
 	CommandList cmdlist = NULL;
 	SingleCommand nextCommand;
 
-	/*pid = fork();
+	pid = fork();
 	if(pid < 0){
 		exit(EXIT_FAILURE);
 	}
@@ -48,32 +48,20 @@ int main(int argc, char* argv[]){
         	exit(2);
     	}
 
-	outfile_fd = open(argv[2], O_WRONLY);
+	outfile_fd = open(argv[2], O_WRONLY | O_APPEND);
     	if(outfile_fd == -1) {
         	perror(argv[2]);
         	exit(2);
     	}
 	
-	createCommandList(&cmdlist, taskfile_fd);
-	
-	/*printf("Succes\n");
-	printf("Argv[0] tego programu: %s\n", argv[0]);
-	runCommand(komenda,0,outfile_fd);
-	printf("Lecimy temacik\n");*/
-	
+	createCommandList(&cmdlist, taskfile_fd);	
+
 	while(cmdlist != NULL){
 		nextCommand = getNext(&cmdlist);
-		printf("Komenda: %i:%s:%i\n",(int)nextCommand.commandTime,nextCommand.command, nextCommand.info);
+		sleep(getNextSeconds(nextCommand));
+		runCommand(nextCommand.command,0,outfile_fd);
 	}
 	
-	/*	
-
-	while(1){
-		/* kod demona
-
-		sleep(30);
-	}
-	*/
 	close(taskfile_fd);
 	close(outfile_fd);
 	exit(EXIT_SUCCESS);

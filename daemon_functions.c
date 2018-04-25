@@ -11,7 +11,6 @@ int getNextSeconds(SingleCommand cmd){
 }
 
 void runCommand(char* cmd, int info, int out_fd){
-	printf("runCommand\n");
 	char** args;
 	char* bufor;
 	int index = 1;
@@ -21,17 +20,17 @@ void runCommand(char* cmd, int info, int out_fd){
 		bufor = strtok(NULL," ");
 		index++;
 	}
-	args = (char**)malloc(sizeof(char*)*index);
+	args = (char**)malloc(sizeof(char*)*(index+1));
 	index = 0;
 
 	bufor = strtok(cmd," ");
 	while(bufor != NULL){
 		args[index] = (char*)malloc(sizeof(char)*strlen(bufor));
-		strcpy(args[index],bufor);
+		strcpy(args[index++],bufor);
 		bufor = strtok(NULL," ");
 	}
+	args[index] = NULL;
 
-	printf("porobione argsy przed forkiem\n");
 	pid_t pid;
 	
 	pid = fork();
@@ -41,17 +40,19 @@ void runCommand(char* cmd, int info, int out_fd){
 	}
 
 	if(pid == (pid_t)0){
-		printf("leci proces\n");
-		printf("Args[0]: %s", args[0]);
-		printf("niepowinno");
 		dup2(out_fd,STDOUT_FILENO);
+		//if(setsid() < 0)
+		//	exit(EXIT_FAILURE);
+		printf("Output of: ");
+		for(int i = 0; i < index;i++){
+			printf("%s ",args[i]);
+		}
+		printf("\n");
 		execvp(args[0], args);
-		printf("Wyleciala plyta");
-		exit(EXIT_SUCCESS);
 	}
 	else{
-		printf("czekam\n");
 	}
+
 }
 
 time_t setNow(void){
