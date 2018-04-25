@@ -63,23 +63,20 @@ int main(int argc, char* argv[]){
         	exit(2);
     	}
 
-	outfile_fd = open(argv[2], O_WRONLY);
+	outfile_fd = open(argv[2], O_WRONLY | O_APPEND);
     	if(outfile_fd == -1) {
         	perror(argv[2]);
         	exit(2);
     	}
 	
-	createCommandList(&cmdlist, taskfile_fd);
-	raise(SIGUSR2);
+	createCommandList(&cmdlist, taskfile_fd);	
 
-	/*	
-
-	while(1){
-		/* kod demona
-
-		sleep(30);
+	while(cmdlist != NULL){
+		nextCommand = getNext(&cmdlist);
+		sleep(getNextSeconds(nextCommand));
+		runCommand(nextCommand.command,0,outfile_fd);
 	}
-	*/
+	
 	close(taskfile_fd);
 	close(outfile_fd);
 	exit(EXIT_SUCCESS);
