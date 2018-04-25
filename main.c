@@ -10,7 +10,7 @@
 #include "command_list.h"
 #include "daemon_functions.h"
 
-CommandList cmdlist = NULL;
+CommandList cmdlist;
 
 void handler(int signum){
 	switch(signum){
@@ -19,15 +19,15 @@ void handler(int signum){
 		case SIGUSR2:
 			saveToSyslog(cmdlist);
 		break;
-	}
+	};
 }
 
 int main(int argc, char* argv[]){
 	pid_t pid, sid;
 	int taskfile_fd, outfile_fd;
-	char komenda[] = "ls";
 
 	SingleCommand nextCommand;
+	cmdlist = NULL;
 	
 	signal(SIGUSR1, handler);
 	signal(SIGUSR2, handler);
@@ -68,16 +68,22 @@ int main(int argc, char* argv[]){
         	perror(argv[2]);
         	exit(2);
     	}
-	
-	createCommandList(&cmdlist, taskfile_fd);	
 
+	openlog(NULL, LOG_NDELAY, LOG_INFO);
+
+	createCommandList(&cmdlist, taskfile_fd);
+	raise(SIGUSR2);
+	
 	while(cmdlist != NULL){
-		nextCommand = getNext(&cmdlist);
+		nextCommand = getNext(cmdlist);
 		sleep(getNextSeconds(nextCommand));
 		runCommand(nextCommand.command,0,outfile_fd);
+		deleteRoot(&cmdlist);
 	}
 	
 	close(taskfile_fd);
 	close(outfile_fd);
+	syslog(LOG_INFO,"All done, good bye");
+	closelog();
 	exit(EXIT_SUCCESS);
 }

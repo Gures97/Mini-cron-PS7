@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <syslog.h>
 #include "command_list.h"
 
 void addCommand(CommandList* root,
@@ -58,20 +59,25 @@ void createCommandList(CommandList* root, int taskfile_fd)
 				}
 				buffer[i-1] = ch;
 			}
-			else if(buffbuffer == NULL)
+			else if(buffbuffer == NULL){
+				syslog(LOG_INFO, "cmdlist creation error: buffer error");
+				closelog();
 				exit(EXIT_FAILURE);
+			}
 
 		}
 
 		if(strlen(buffer) > 0){
 			pch = strtok (buffer, ":");
 			if((hour = atoi(pch)) < 0){
-				printf("Zesral sie hour");
+				syslog(LOG_INFO, "cmdlist creation error: invalid 'hour'");
+				closelog();
 				exit(EXIT_FAILURE);
 			}
 			pch = strtok (NULL, ":");
 			if((minutes = atoi(pch)) < 0){
-				printf("Zesraly sie minutes");
+				syslog(LOG_INFO, "cmdlist creation error: invalid 'minutes'");
+				closelog();
 				exit(EXIT_FAILURE);
 			}
 			pch = strtok (NULL, ":");
@@ -79,7 +85,8 @@ void createCommandList(CommandList* root, int taskfile_fd)
 			strcpy(command, pch);
 			pch = strtok (NULL, ":");
 			if((info = atoi(pch)) < 0){
-				printf("Zesralo sie info");
+				syslog(LOG_INFO, "cmdlist creation error: invalid 'info'");
+				closelog();
 				exit(EXIT_FAILURE);
 			}
 	    		time(&now);
@@ -91,19 +98,20 @@ void createCommandList(CommandList* root, int taskfile_fd)
 	sort(*root);
 }
 
-SingleCommand getNext(CommandList* root){
-	SingleCommand command;
+void deleteRoot(CommandList* root){
 	CommandList newRoot;
-	command = **root;
 	newRoot = (*root)->next;
 	free(*root);
 	*root = newRoot;
-	return command;
+}
+
+SingleCommand getNext(CommandList root){
+	return *root;
 }
 
 void clearList(CommandList* root){
 	while(*root != NULL)
-		getNext(root);
+		deleteRoot(root);
 }
 
 CommandList last(CommandList root){
@@ -112,16 +120,6 @@ CommandList last(CommandList root){
 	while(root->next != NULL)
 		root = root->next;
 	return root;
-}
-
-int howMuchCommands(CommandList* root){
-	int count = 0;
-	CommandList temp = *root;
-	while(temp != NULL){
-		count++;
-		temp = temp->next;
-	}
-	return count;
 }
 
 void sort(CommandList root){

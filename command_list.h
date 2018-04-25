@@ -17,11 +17,11 @@ void addCommand(CommandList* root,
 		int info,
 		time_t now);
 
-SingleCommand getNext(CommandList* root);
+SingleCommand getNext(CommandList root);
+
+void deleteRoot(CommandList* root);
 
 void clearList(CommandList* root);
-
-int howMuchCommands(CommandList* root);
 
 CommandList last(CommandList root);
 

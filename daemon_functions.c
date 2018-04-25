@@ -37,14 +37,14 @@ void runCommand(char* cmd, int info, int out_fd){
 
 	pid = fork();
 	if(pid < 0){
-		printf("Zesralo sie\n");
+		syslog(LOG_INFO,"Fork error: %s", args[0]);
+		closelog();
 		exit(EXIT_FAILURE);
 	}
 
 	if(pid == (pid_t)0){
+		syslog(LOG_INFO, "Execute command %s", args[0]);
 		dup2(out_fd,STDOUT_FILENO);
-		//if(setsid() < 0)
-		//	exit(EXIT_FAILURE);
 		printf("Output of: ");
 		for(int i = 0; i < index;i++){
 			printf("%s ",args[i]);
@@ -64,24 +64,12 @@ time_t setNow(void){
 }
 
 void saveToSyslog(CommandList root){
-	openlog(NULL, LOG_NDELAY, LOG_INFO);
+	syslog(LOG_INFO,"List of commands");
 	while(root != NULL) {
-	
-		struct tm commandTime;
-		localtime_r(&(root->commandTime), &commandTime);
-		time_t now;
-		time(&now);
-		struct tm currentTime;
-		localtime_r(&now, &currentTime);
-		printf("Command Time: %d:%d %d.%d.%d\n", commandTime.tm_hour, commandTime.tm_min, commandTime.tm_mday, commandTime.tm_mon, commandTime.tm_year);
-		if(commandTime.tm_mday == currentTime.tm_mday &&	
-			(commandTime.tm_hour > currentTime.tm_hour ||
-			commandTime.tm_hour == currentTime.tm_hour && commandTime.tm_min > currentTime.tm_hour))
-			 {
-			syslog(LOG_INFO,"%d:%d:%s:%d", commandTime.tm_hour, commandTime.tm_min, root->command, root->info);
-		}
+		struct tm * commandTime = localtime(&(root->commandTime));
+		
+		syslog(LOG_INFO,"%d:%d:%s:%d", commandTime->tm_hour, commandTime->tm_min, root->command, root->info);
 		root = root->next;
 	}
-	closelog();
 }
 
