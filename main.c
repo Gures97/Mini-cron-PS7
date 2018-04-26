@@ -11,10 +11,13 @@
 #include "daemon_functions.h"
 
 CommandList cmdlist;
+int taskfile_fd;
 
 void handler(int signum){
 	switch(signum){
 		case SIGUSR1:
+			clearList(&cmdlist);
+			createCommandList(&cmdlist, taskfile_fd);
 		break;
 		case SIGUSR2:
 			saveToSyslog(cmdlist);
@@ -24,7 +27,7 @@ void handler(int signum){
 
 int main(int argc, char* argv[]){
 	pid_t pid, sid;
-	int taskfile_fd, outfile_fd;
+	int outfile_fd;
 
 	SingleCommand nextCommand;
 	cmdlist = NULL;

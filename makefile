@@ -1,9 +1,9 @@
 OBJ = main.o command_list.o daemon_functions.o
 
-all: Mini-cron
+all: minicron
 
-Mini-cron: $(OBJ)
-	gcc $(OBJ) -o Mini-cron
+minicron: $(OBJ)
+	gcc $(OBJ) -o minicron
 
 $(OBJ): command_list.h daemon_functions.h
 
