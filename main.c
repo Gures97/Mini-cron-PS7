@@ -72,7 +72,6 @@ int main(int argc, char* argv[]){
 	openlog(NULL, LOG_NDELAY, LOG_INFO);
 
 	createCommandList(&cmdlist, taskfile_fd);
-	raise(SIGUSR2);
 	
 	while(cmdlist != NULL){
 		nextCommand = getNext(cmdlist);

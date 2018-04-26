@@ -1,0 +1,74 @@
+a.out
+command_list.c
+command_list.h
+command_list.h.gch
+command_list.o
+daemon_functions.c
+daemon_functions.h
+daemon_functions.h.gch
+daemon_functions.o
+logi.txt
+main.c
+main.o
+makefile
+Mini-cron
+README.md
+zadania.txt
+
+Output of: ls
+
+a.out
+command_list.c
+command_list.h
+command_list.h.gch
+command_list.o
+daemon_functions.c
+daemon_functions.h
+daemon_functions.h.gch
+daemon_functions.o
+logi.txt
+main.c
+main.o
+makefile
+Mini-cron
+README.md
+zadania.txt
+
+Output of: ls
+
+a.out
+command_list.c
+command_list.h
+command_list.h.gch
+command_list.o
+daemon_functions.c
+daemon_functions.h
+daemon_functions.h.gch
+daemon_functions.o
+logi.txt
+main.c
+main.o
+makefile
+Mini-cron
+README.md
+zadania.txt
+
+Output of: ls-l
+
+razem 3944
+-rwxrwxr-x 1 gures gures   14120 kwi 23 16:49 a.out
+-rw-rw-r-- 1 gures gures    3234 kwi 25 23:51 command_list.c
+-rw-rw-r-- 1 gures gures     621 kwi 25 23:50 command_list.h
+-rw-rw-r-- 1 gures gures 1753872 kwi 23 16:49 command_list.h.gch
+-rw-rw-r-- 1 gures gures    5216 kwi 25 23:52 command_list.o
+-rw-rw-r-- 1 gures gures    1728 kwi 26 11:25 daemon_functions.c
+-rw-rw-r-- 1 gures gures     260 kwi 25 22:53 daemon_functions.h
+-rw-rw-r-- 1 gures gures 2061584 kwi 23 16:49 daemon_functions.h.gch
+-rw-rw-r-- 1 gures gures    4184 kwi 26 11:26 daemon_functions.o
+-rw-rw-r-- 1 gures gures     692 kwi 26 11:27 logi.txt
+-rw-r--r-- 1 gures gures    1512 kwi 26 10:49 main.c
+-rw-rw-r-- 1 gures gures    3360 kwi 26 10:55 main.o
+-rw-rw-r-- 1 gures gures     184 kwi 23 23:17 makefile
+-rwxrwxr-x 1 gures gures   14640 kwi 26 11:26 Mini-cron
+-rw-rw-r-- 1 gures gures       0 mar 27 21:22 README.md
+-rw-rw-r-- 1 gures gures      15 kwi 26 11:26 zadania.txt

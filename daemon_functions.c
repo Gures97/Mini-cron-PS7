@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "daemon_functions.h"
 #include <syslog.h>
+#include <sys/wait.h>
 
 
 int getNextSeconds(SingleCommand cmd){
@@ -15,9 +16,13 @@ int getNextSeconds(SingleCommand cmd){
 void runCommand(char* cmd, int info, int out_fd){
 	char** args;
 	char* bufor;
+	char* fullCommand = (char*)malloc(strlen(cmd)*sizeof(char));
 	int index = 1;
+	char header[] = "\nOutput of: ";
+	char spacer[] = "\n\n";
 
-	bufor = strtok(cmd," ");
+	strcpy(fullCommand, cmd);
+	bufor = strtok(fullCommand," ");
 	while(bufor != NULL){
 		bufor = strtok(NULL," ");
 		index++;
@@ -45,14 +50,15 @@ void runCommand(char* cmd, int info, int out_fd){
 	if(pid == (pid_t)0){
 		syslog(LOG_INFO, "Execute command %s", args[0]);
 		dup2(out_fd,STDOUT_FILENO);
-		printf("Output of: ");
+		write(out_fd,header,strlen(header)*sizeof(char));
 		for(int i = 0; i < index;i++){
-			printf("%s ",args[i]);
+			write(out_fd,args[i],strlen(args[i])*sizeof(char));
 		}
-		printf("\n");
+		write(out_fd,spacer,strlen(spacer) * sizeof(char));
 		execvp(args[0], args);
 	}
 	else{
+		waitpid(pid,NULL,0);
 	}
 
 }
