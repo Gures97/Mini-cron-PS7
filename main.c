@@ -10,7 +10,7 @@
 #include "command_list.h"
 #include "daemon_functions.h"
 
-CommandList cmdlist;
+CommandList cmdlist = NULL;
 
 void handler(int signum){
 	switch(signum){
@@ -24,14 +24,13 @@ void handler(int signum){
 
 int main(int argc, char* argv[]){
 	pid_t pid, sid;
-	int taskfile_fd, outfile_fd;
+	int taskfile_fd, outfile_fd, null_fd;
 
 	SingleCommand nextCommand;
 	cmdlist = NULL;
-	
-	signal(SIGUSR1, handler);
-	signal(SIGUSR2, handler);
-	/*pid = fork();
+
+
+	pid = fork();
 	if(pid < 0){
 		exit(EXIT_FAILURE);
 	}
@@ -47,10 +46,18 @@ int main(int argc, char* argv[]){
 		exit(EXIT_FAILURE);
 	}
 
-	/*if((chdir("/")) < 0){
-		exit(EXIT_FAILURE);
-	}*/
+	signal(SIGUSR1, handler);
+	signal(SIGUSR2, handler);
 
+	pid = fork();
+
+	if(pid < 0){
+		exit(EXIT_FAILURE);
+	}
+
+	if(pid > 0){
+		exit(EXIT_SUCCESS);
+	}
 
 	if(argc != 3) {
         printf("Usage: ./minicron <taskfile> <outfile>");
@@ -68,15 +75,23 @@ int main(int argc, char* argv[]){
         	perror(argv[2]);
         	exit(2);
     	}
+	
+	null_fd = open("/dev/null", O_WRONLY);
+    	if(null_fd == -1) {
+        	perror("/dev/null");
+        	exit(2);
+    	}
 
 	openlog(NULL, LOG_NDELAY, LOG_INFO);
 
 	createCommandList(&cmdlist, taskfile_fd);
-	
+	syslog(LOG_INFO, "Mini-cron started");
+	char ***command = NULL;
 	while(cmdlist != NULL){
 		nextCommand = getNext(cmdlist);
-		sleep(getNextSeconds(nextCommand));
-		runCommand(nextCommand.command,0,outfile_fd);
+		while(getNextSeconds(nextCommand) > 0)
+			sleep(getNextSeconds(nextCommand));
+		runCommand(nextCommand.command,0,outfile_fd,null_fd);
 		deleteRoot(&cmdlist);
 	}
 	

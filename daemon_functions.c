@@ -13,54 +13,66 @@ int getNextSeconds(SingleCommand cmd){
 	return (int)difftime(cmd.commandTime, now);
 }
 
-void runCommand(char* cmd, int info, int out_fd){
-	char** args;
-	char* bufor;
-	char* fullCommand = (char*)malloc(strlen(cmd)*sizeof(char));
-	int index = 1;
+void runCommand(char* cmd, int info, int out_fd, int null_fd){
+	char*** cmds;
+	char** currArg = NULL;
 	char header[] = "\nOutput of: ";
-	char spacer[] = "\n\n";
+	int status;
+	int potok[2];
+	int index = 0;
+	int in_fd = STDIN_FILENO;
 
-	strcpy(fullCommand, cmd);
-	bufor = strtok(fullCommand," ");
-	while(bufor != NULL){
-		bufor = strtok(NULL," ");
-		index++;
-	}
-	args = (char**)malloc(sizeof(char*)*(index+1));
-	index = 0;
-
-	bufor = strtok(cmd," ");
-	while(bufor != NULL){
-		args[index] = (char*)malloc(sizeof(char)*strlen(bufor));
-		strcpy(args[index++],bufor);
-		bufor = strtok(NULL," ");
-	}
-	args[index] = NULL;
+	cmds = sliceCommands(cmd);
+	currArg = cmds[0];
 
 	pid_t pid;
-
-	pid = fork();
-	if(pid < 0){
-		syslog(LOG_INFO,"Fork error: %s", args[0]);
-		closelog();
-		exit(EXIT_FAILURE);
-	}
-
-	if(pid == (pid_t)0){
-		syslog(LOG_INFO, "Execute command %s", args[0]);
-		dup2(out_fd,STDOUT_FILENO);
-		write(out_fd,header,strlen(header)*sizeof(char));
-		for(int i = 0; i < index;i++){
-			write(out_fd,args[i],strlen(args[i])*sizeof(char));
+	syslog(LOG_INFO, "Execute command %s Number of commands: %i", cmd, countCMDs(cmds));
+	while (currArg != NULL)
+    	{
+		pipe(potok);
+		pid = fork();
+		if(pid < 0){
+			syslog(LOG_INFO, "Fork error: %s", currArg[0]);
+			closelog();
+			exit(EXIT_FAILURE);
 		}
-		write(out_fd,spacer,strlen(spacer) * sizeof(char));
-		execvp(args[0], args);
+		if(pid == 0){
+			dup2(in_fd, STDIN_FILENO);
+			if(cmds[index+1] != NULL){
+				dup2(potok[1],STDOUT_FILENO);
+			}
+			else{
+				switch(info){
+					case 0:
+						dup2(out_fd,STDOUT_FILENO);
+						dup2(null_fd,STDERR_FILENO);
+						break;
+					case 1:
+						dup2(null_fd,STDOUT_FILENO);
+						dup2(out_fd,STDERR_FILENO);
+						break;
+					case 2:
+						dup2(out_fd,STDOUT_FILENO);
+						dup2(out_fd,STDERR_FILENO);
+						break;
+				}
+				write(out_fd,header,strlen(header)*sizeof(char));
+				write(out_fd,cmd,strlen(cmd)*sizeof(char));
+			}
+			close(potok[0]);
+			execvp(currArg[0], currArg);
+			exit(EXIT_FAILURE);
+		}
+		else{
+			waitpid(pid,&status,0);
+			close(potok[1]);
+			in_fd = potok[0];
+			if(cmds[++index] == NULL)
+				syslog(LOG_INFO, "Command %s executed, status: %i", currArg[0], status);
+			currArg = cmds[index];
+		}
 	}
-	else{
-		waitpid(pid,NULL,0);
-	}
-
+	flushCommand(&cmds);
 }
 
 time_t setNow(void){
@@ -77,5 +89,73 @@ void saveToSyslog(CommandList root){
 		syslog(LOG_INFO,"%d:%d:%s:%d", commandTime->tm_hour, commandTime->tm_min, root->command, root->info);
 		root = root->next;
 	}
+}
+
+char*** sliceCommands(char* cmd){
+	char*** slices = NULL;	
+	char* buffer;
+	char** rawCommands = NULL;
+	char** commandBuffer = NULL;
+	int cmdCount = 0, index;
+
+	buffer = strtok(cmd,"|");
+
+	while(buffer != NULL){
+		if(strlen(buffer) > 0){
+			commandBuffer = (char**)realloc(rawCommands,(cmdCount+1) * sizeof(char*));
+			rawCommands = commandBuffer;
+			rawCommands[cmdCount] = (char*)malloc(strlen(buffer)*sizeof(char));
+			strcpy(rawCommands[cmdCount],buffer);
+			cmdCount++;
+		}
+syslog(LOG_INFO,"%s",buffer);
+		buffer = strtok(NULL,"|");
+	}
+	rawCommands = (char**)realloc(rawCommands,(cmdCount+1) * sizeof(char*));
+	rawCommands[cmdCount] = NULL;
+	slices = (char***)malloc(sizeof(char**)*(cmdCount+1));
+	for(int i = 0; i<cmdCount;i++)
+		slices[i] = NULL;
+	cmdCount = 0;
+	while(rawCommands[cmdCount] != NULL){
+		index = 0;
+		buffer = strtok(rawCommands[cmdCount]," ");
+		while(buffer != NULL){
+			if(strlen(buffer)>0){
+				commandBuffer = (char**)realloc(slices[cmdCount], (cmdCount+1)*sizeof(char*));
+				slices[cmdCount] = commandBuffer;
+				slices[cmdCount][index] = (char*)malloc(strlen(buffer)*sizeof(char));
+				strcpy(slices[cmdCount][index++], buffer);
+			}
+			buffer = strtok(NULL," ");
+		}
+		commandBuffer = (char**)realloc(slices[cmdCount], (cmdCount+1)*sizeof(char*));
+		slices[cmdCount] = commandBuffer;
+		slices[cmdCount][index] = NULL;
+		cmdCount++;
+	}
+	slices[cmdCount] = NULL;
+	return slices;
+}
+
+void flushCommand(char**** slices){
+	for(int i = 0;(*slices)[i] != NULL;i++){
+		for(int j = 0; (*slices)[i][j] != NULL; j++){
+			free((*slices)[i][j]);
+		}
+		free((*slices)[i]);
+	}
+	free(*slices);
+}
+
+int countCMDs(char*** args){
+	char** temp;
+	int count = 0;
+	do{
+		temp = args[count];
+		count++;
+	}while(temp != NULL);
+		
+	return count;
 }
 
