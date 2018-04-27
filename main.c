@@ -10,12 +10,10 @@
 #include "command_list.h"
 #include "daemon_functions.h"
 
-<<<<<<< HEAD
+
 CommandList cmdlist = NULL;
-=======
-CommandList cmdlist;
+
 int taskfile_fd;
->>>>>>> master
 
 void handler(int signum){
 	switch(signum){
@@ -31,11 +29,7 @@ void handler(int signum){
 
 int main(int argc, char* argv[]){
 	pid_t pid, sid;
-<<<<<<< HEAD
-	int taskfile_fd, outfile_fd, null_fd;
-=======
-	int outfile_fd;
->>>>>>> master
+	int outfile_fd, null_fd;
 
 	SingleCommand nextCommand;
 	cmdlist = NULL;
