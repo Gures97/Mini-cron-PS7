@@ -1,2 +1,9 @@
 21:10:ls|grep main.c:2
+00:15:ls -l:0
+15:21:ls -l /etc | grep host:2
+12:03:cd ~:1
+23:47:ps -a | sort | uniq | grep -v sh:2
+06:33:who|sort|cut -f1 -d" "|uniq|wc -l:0
+11:46:ifconfig | grep "inet addr" | cut -f2 -d: | cut -f1 -d" ":1
+
 

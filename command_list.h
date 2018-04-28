@@ -27,6 +27,8 @@ CommandList last(CommandList root);
 
 void createCommandList(CommandList* root, int taskfile_fd);
 
+void updateCommandList(CommandList* root, char* taskfile);
+
 void swap(CommandList a, CommandList b);
 
 void sort(CommandList root);

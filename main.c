@@ -12,14 +12,12 @@
 
 
 CommandList cmdlist = NULL;
-
-int taskfile_fd;
+char* taskfile;
 
 void handler(int signum){
 	switch(signum){
 		case SIGUSR1:
-			clearList(&cmdlist);
-			createCommandList(&cmdlist, taskfile_fd);
+			updateCommandList(&cmdlist, taskfile);
 		break;
 		case SIGUSR2:
 			saveToSyslog(cmdlist);
@@ -29,7 +27,8 @@ void handler(int signum){
 
 int main(int argc, char* argv[]){
 	pid_t pid, sid;
-	int outfile_fd, null_fd;
+	int taskfile_fd, outfile_fd, null_fd;
+	taskfile = argv[1];
 
 	SingleCommand nextCommand;
 	cmdlist = NULL;
@@ -90,6 +89,8 @@ int main(int argc, char* argv[]){
 	openlog(NULL, LOG_NDELAY, LOG_INFO);
 
 	createCommandList(&cmdlist, taskfile_fd);
+	close(taskfile_fd);
+
 	syslog(LOG_INFO, "Mini-cron started");
 	char ***command = NULL;
 	while(cmdlist != NULL){
@@ -100,7 +101,6 @@ int main(int argc, char* argv[]){
 		deleteRoot(&cmdlist);
 	}
 	
-	close(taskfile_fd);
 	close(outfile_fd);
 	syslog(LOG_INFO,"All done, good bye");
 	closelog();

@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <fcntl.h>
 #include "command_list.h"
 
 void addCommand(CommandList* root,
@@ -96,6 +97,17 @@ void createCommandList(CommandList* root, int taskfile_fd)
     	}while(isEnd != 0);
 	free(buffer);
 	sort(*root);
+}
+
+void updateCommandList(CommandList* root, char* taskfile){
+	clearList(root);
+	int taskfile_fd = open(taskfile, O_RDONLY);
+	if(taskfile_fd == -1) {
+		perror(taskfile);
+		exit(2);
+	}
+	createCommandList(root, taskfile_fd);
+	//close(taskfile_fd);
 }
 
 void deleteRoot(CommandList* root){
